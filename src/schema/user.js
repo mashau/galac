@@ -13,6 +13,7 @@ extend type Mutation {
       password: String!): Token!
   signIn(login: String!, 
      password: String!): Token!
+  deleteUser(id: ID!): Boolean!
 }
 
 type Token {
@@ -23,6 +24,7 @@ type User {
   id: ID! 
   username: String!
   email: String!
+  role: String
   messages: [Message!]
 }
 `;

@@ -1,9 +1,13 @@
 import jwt from 'jsonwebtoken';
+import { SECRET } from '../config';
 import { AuthenticationError, UserInputError} from 'apollo-server';
+import { combineResolvers } from 'graphql-resolvers';
+
+import { isAdmin } from './authorization';
 
 const createToken = async (user, secret, expiresIn) => {
-    const {id, email, username } = user;
-    return await jwt.sign({ id, email, username}, { secret }, {
+    const {id, email, username, role } = user;
+    return await jwt.sign({ id, email, username, role}, secret , {
         expiresIn,
     });
 };
@@ -25,13 +29,13 @@ export default{
      },
 
      Mutation: {
-       signUp: async (parent,{username, email, password},{ models }) => {
+       signUp: async (parent,{username, email, password},{ models, secret }) => {
                  const user = await models.User.create({
                      username,
                      email,
                      password
                  });
-                 return { token: createToken(user, secret, '30m') };
+                 return { token: await createToken(user, secret, '30m') };
              },
         signIn: async (parent, {login, password }, { models, secret}) => {
             const user = await models.User.findByLogin(login);
@@ -48,8 +52,16 @@ export default{
                 throw new AuthenticationError('Invalid password');
             }
 
-            return {token: createToken(user, secret, '30m')};
+            return {token: await createToken(user, secret, '30m')};
+        },
+        deleteUser: combineResolvers(
+            isAdmin,
+            async(parent, { id }, { models }) => {
+            return await models.User.destroy({
+                where: { id },
+            });
         }
+        ),
      },
   
    

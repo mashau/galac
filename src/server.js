@@ -13,31 +13,31 @@ const app = express();
 app.use(cors());
 
 const getMe = async req => {
-  const token = req.headers['x-token'];
+   const token = req.headers['x-token'];
 
-  if(token) {
-    try{
-      return await jwt.verify(token, process.env.SECRET);
-    } catch {
-      throw new AuthenticationError(
-        'Your session expired. Sign in again.',
+   if(token) {
+     try{
+       return await jwt.verify(token, process.env.SECRET);
+     } catch(e) {
+       throw new AuthenticationError(
+          'Your session expired. Sign in again.',
       )
-    }
+     }
   }
 }
 
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
-  context: async ({ req }) => ({
-    me: await getMe(req),
+  context: async ({ req }) => {
+    const me = await getMe(req);
 
-    return: {
+     return {
       models,
       me,
       secret: process.env.SECRET,
-    },
-  }),
+    };
+  },
 });
 
 server.applyMiddleware({ app, path: '/graphql' });
@@ -59,6 +59,7 @@ const createUsersWithMessages = async () => {
     username: 'sam',
     email: 'hello@robin.com',
     password: 'rwieruch',
+    role: 'ADMIN',
     messages: [{
       text: 'Published the Road to learn React',
     },

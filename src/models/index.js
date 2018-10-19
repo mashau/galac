@@ -7,7 +7,7 @@ const sequelize = new Sequelize(
   process.env.DATABASE_PASSWORD,
   {
   host: 'localhost',
-  dialect: 'sqlite',
+  dialect: 'postgres',
   operatorsAliases: false,
 
   pool: {
@@ -16,8 +16,6 @@ const sequelize = new Sequelize(
     acquire: 30000,
     idle: 10000
   },
-
-  storage: 'galac.sqlite3'
    }
 );
 
